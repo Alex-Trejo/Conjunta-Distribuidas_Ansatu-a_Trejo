@@ -1,4 +1,4 @@
-package com.conjunta.model;
+package com.conjunta.service;
 
 public class EvaluadorRiesgo {
 }
