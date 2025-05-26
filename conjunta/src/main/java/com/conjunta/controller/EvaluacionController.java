@@ -1,8 +1,9 @@
 package com.conjunta.controller;
 
-import com.example.riesgocrediticio.dto.EvaluacionRequestDTO;
-import com.example.riesgocrediticio.dto.EvaluacionResponseDTO;
-import com.example.riesgocrediticio.service.EvaluacionService;
+import com.conjunta.dto.EvaluacionRequestDTO;
+import com.conjunta.dto.EvaluacionResponseDTO;
+import com.conjunta.model.HistorialEvaluacion;
+import com.conjunta.service.EvaluacionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

@@ -76,13 +76,14 @@ public class EvaluacionService {
         }
 
         // Determinar nivel de riesgo
+        int finalPuntajeActual = puntajeActual;
         EvaluadorRiesgo evaluador = Arrays.asList(new EvaluadorRiesgoBajo(), new EvaluadorRiesgoMedio(), new EvaluadorRiesgoAlto())
                 .stream()
                 .filter(e -> {
                     EvaluacionResponseDTO response = e.evaluar(cliente);
-                    return puntajeActual >= 80 && "BAJO".equals(response.getNivelRiesgo()) ||
-                            (puntajeActual >= 60 && puntajeActual <= 79 && "MEDIO".equals(response.getNivelRiesgo())) ||
-                            (puntajeActual < 60 && "ALTO".equals(response.getNivelRiesgo()));
+                    return finalPuntajeActual >= 80 && "BAJO".equals(response.getNivelRiesgo()) ||
+                            (finalPuntajeActual >= 60 && finalPuntajeActual <= 79 && "MEDIO".equals(response.getNivelRiesgo())) ||
+                            (finalPuntajeActual < 60 && "ALTO".equals(response.getNivelRiesgo()));
                 })
                 .findFirst()
                 .orElse(new EvaluadorRiesgoAlto());

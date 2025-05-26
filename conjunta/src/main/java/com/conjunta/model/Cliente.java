@@ -1,6 +1,5 @@
 package com.conjunta.model;
 
-
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
@@ -21,6 +20,7 @@ public abstract class Cliente {
     private int puntajeCrediticio;
     private double montoSolicitado;
     private int plazoEnMeses;
+
     @ElementCollection
     private List<Deuda> deudasActuales;
 

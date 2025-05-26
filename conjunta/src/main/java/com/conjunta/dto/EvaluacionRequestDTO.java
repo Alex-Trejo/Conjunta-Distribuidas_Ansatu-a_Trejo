@@ -1,5 +1,6 @@
 package com.conjunta.dto;
 
+import com.conjunta.model.Deuda;
 import lombok.Data;
 
 import java.util.List;
