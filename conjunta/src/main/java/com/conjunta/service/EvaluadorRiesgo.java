@@ -1,4 +1,8 @@
 package com.conjunta.service;
 
-public class EvaluadorRiesgo {
+import com.conjunta.dto.EvaluacionResponseDTO;
+import com.conjunta.model.Cliente;
+
+public abstract class EvaluadorRiesgo {
+    public abstract EvaluacionResponseDTO evaluar(Cliente cliente);
 }
