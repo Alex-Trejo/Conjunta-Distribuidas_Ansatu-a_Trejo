@@ -5,7 +5,10 @@ import com.conjunta.dto.EvaluacionResponseDTO;
 
 
 import com.conjunta.model.*;
+import com.conjunta.repository.ClienteRepository;
 import com.conjunta.repository.HistorialEvaluacionRepository;
+import com.conjunta.repository.PersonaJuridicaRepository;
+import com.conjunta.repository.PersonaNaturalRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +21,12 @@ import java.util.stream.Collectors;
 public class EvaluacionService {
     @Autowired
     private HistorialEvaluacionRepository historialRepository;
+    @Autowired
+    private ClienteRepository clienteRepository;
+    @Autowired
+    private PersonaNaturalRepository personaNaturalRepository;
+    @Autowired
+    private PersonaJuridicaRepository personaJuridicaRepository;
 
     public EvaluacionResponseDTO evaluarRiesgo(EvaluacionRequestDTO request) {
         // Validaciones básicas
@@ -25,31 +34,53 @@ public class EvaluacionService {
             throw new IllegalArgumentException("Datos inválidos o incompletos");
         }
 
+        //Validaciones
+        if (request.getDeudasActuales() == null || request.getDeudasActuales().isEmpty() || request.getDeudasActuales().stream().anyMatch(d -> d.getMonto() <= 0) ) {
+            throw new IllegalArgumentException("Corregir las deudas actuales");
+        }
+
+        if (request.getIngresoMensual() == null || request.getIngresoMensual() <= 0) {
+            throw new IllegalArgumentException("Corregir el ingreso mensual");
+        }
+
+        if (request.getEdad() == null || request.getEdad() <= 0) {
+            throw new IllegalArgumentException("Corregir la edad");
+        }
+
+
+
+
         Cliente cliente;
         if ("NATURAL".equalsIgnoreCase(request.getTipoCliente())) {
             if (request.getIngresoMensual() == null || request.getEdad() == null) {
                 throw new IllegalArgumentException("Faltan datos para Persona Natural");
             }
-            cliente = new PersonaNatural();
-            ((PersonaNatural) cliente).setIngresoMensual(request.getIngresoMensual());
-            ((PersonaNatural) cliente).setEdad(request.getEdad());
+            PersonaNatural personaNatural = new PersonaNatural();
+            personaNatural.setNombre(request.getNombre());
+            personaNatural.setPuntajeCrediticio(request.getPuntajeCrediticio());
+            personaNatural.setDeudasActuales(request.getDeudasActuales());
+            personaNatural.setMontoSolicitado(request.getMontoSolicitado());
+            personaNatural.setPlazoEnMeses(request.getPlazoEnMeses());
+            personaNatural.setIngresoMensual(request.getIngresoMensual());
+            personaNatural.setEdad(request.getEdad());
+            cliente = personaNaturalRepository.save(personaNatural); // Guardar en la tabla PersonaNatural
         } else if ("JURIDICA".equalsIgnoreCase(request.getTipoCliente())) {
             if (request.getIngresoAnual() == null || request.getAntiguedadAnios() == null || request.getEmpleados() == null) {
                 throw new IllegalArgumentException("Faltan datos para Persona Jurídica");
             }
-            cliente = new PersonaJuridica();
-            ((PersonaJuridica) cliente).setIngresoAnual(request.getIngresoAnual());
-            ((PersonaJuridica) cliente).setAntiguedadAnios(request.getAntiguedadAnios());
-            ((PersonaJuridica) cliente).setEmpleados(request.getEmpleados());
+            PersonaJuridica personaJuridica = new PersonaJuridica();
+            personaJuridica.setNombre(request.getNombre());
+            personaJuridica.setPuntajeCrediticio(request.getPuntajeCrediticio());
+            personaJuridica.setDeudasActuales(request.getDeudasActuales());
+            personaJuridica.setMontoSolicitado(request.getMontoSolicitado());
+            personaJuridica.setPlazoEnMeses(request.getPlazoEnMeses());
+            personaJuridica.setIngresoAnual(request.getIngresoAnual());
+            personaJuridica.setAntiguedadAnios(request.getAntiguedadAnios());
+            personaJuridica.setEmpleados(request.getEmpleados());
+            cliente = personaJuridicaRepository.save(personaJuridica); // Guardar en la tabla PersonaJuridica
         } else {
             throw new IllegalArgumentException("Tipo de cliente no válido");
         }
-
-        cliente.setNombre(request.getNombre());
-        cliente.setPuntajeCrediticio(request.getPuntajeCrediticio());
-        cliente.setDeudasActuales(request.getDeudasActuales());
-        cliente.setMontoSolicitado(request.getMontoSolicitado());
-        cliente.setPlazoEnMeses(request.getPlazoEnMeses());
 
         // Cálculo del puntaje
         int puntajeBase = 100;
@@ -91,7 +122,7 @@ public class EvaluacionService {
         EvaluacionResponseDTO response = evaluador.evaluar(cliente);
         response.setPuntajeFinal(puntajeActual);
 
-        // Guardar en historial
+        // Guardar en historial con referencia al cliente
         HistorialEvaluacion historial = new HistorialEvaluacion();
         historial.setClienteNombre(cliente.getNombre());
         historial.setTipoCliente(request.getTipoCliente());
